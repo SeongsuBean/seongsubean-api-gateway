@@ -1,0 +1,88 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway.server.webflux:
+      routes:
+        # ?? ??
+        # ???
+        - id: seongsubean-account-login
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+        # ???
+        - id: seongsubean-account-login
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+        # ??? ?? ??
+        - id: seongsubean-account-join
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account/exists/email/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # ??? ????
+        - id: seongsubean-account-nickname
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account/exists/nickname/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # ?? ??
+        - id: seongsubean-account-delete
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account/profile,/api/account/profile/image,/api/account
+            - Method=GET,POST,PUT,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER,OWNER,ADMIN
+                requireAuth: true
+        # ?? ??
+        - id: seongsubean-account-manager
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/manager/**
+            - Method=GET,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: ADMIN
+                requireAuth: true
+        # ?? ??
+        - id: seongsubean-cafe-backend # ??? ??
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND #lb: ?? ???
+          predicates: # ???? ??? ??
+            - Path=/api/cafes/** # ??
+            - Method=GET # ??
+          filters:
+            - RemoveRequestHeader=Cookie
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+shop:
+  message: E-shop
+
+token:
+  secret: oopsw
