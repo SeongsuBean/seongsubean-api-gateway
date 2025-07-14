@@ -40,10 +40,10 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
         # 계정 프로필 관리 (고객, 사장, 관리자 권한)
-        - id: seongsubean-account-delete
+        - id: seongsubean-account-manage
           uri: lb://ACCOUNTSERVICE
           predicates:
-            - Path=/api/account/profile,/api/account/profile/image,/api/account
+            - Path=/api/account/profile,/api/account/profile/image/{file},/api/account
             - Method=GET,POST,PUT,DELETE
           filters:
             - RemoveRequestHeader=Cookie
@@ -51,11 +51,35 @@ spring:
               args:
                 allowedRoles: CUSTOMER,OWNER,ADMIN
                 requireAuth: true
+        # 계정 역할 변경 (고객, 사장)
+        - id: seongsubean-account-role
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account/role/{role}
+            - Method=PUT
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER,OWNER
+                requireAuth: true
         #관리자 계정 관리 (관리자 권한)
         - id: seongsubean-account-manager
           uri: lb://ACCOUNTSERVICE
           predicates:
             - Path=/api/manager/users
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: ADMIN
+                requireAuth: true
+        #관리자 계정 관리 (관리자 권한)
+        - id: seongsubean-account-manager-email
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/manager/users/{email}
             - Method=GET,DELETE
           filters:
             - RemoveRequestHeader=Cookie
