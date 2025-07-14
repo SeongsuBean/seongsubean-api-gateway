@@ -8,7 +8,7 @@ spring:
       routes:
         # 계정 라우팅
         # 계정 생성 (모두)
-        - id: seongsubean-account-login
+        - id: seongsubean-account-create
           uri: lb://ACCOUNTSERVICE
           predicates:
             - Path=/api/account
@@ -105,6 +105,14 @@ spring:
           uri: lb://SEONGSUBEAN-CAFE-BACKEND
           predicates:
             - Path=/api/cafes/search
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 메뉴 카테고리별 조회 (모두)
+        - id: seongsubean-cafe-menu-category-select
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/category
             - Method=GET
           filters:
             - RemoveRequestHeader=Cookie
@@ -208,6 +216,64 @@ spring:
               args:
                 allowedRoles: ADMIN
                 requireAuth: true
+        # 메뉴 라우팅
+        # 메뉴 추가 (사장)
+        - id: seongsubean-cafe-menu-create
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/menu
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER
+                requireAuth: true
+        # 전체 메뉴 조회 (모두)
+        - id: seongsubean-cafe-menu-all-select
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/menus
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 단일 메뉴 조회 (사장)
+        - id: seongsubean-cafe-menu-select
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/menu/{menuId}
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER
+                requireAuth: true
+        # 단일 메뉴 수정 (사장)
+        - id: seongsubean-cafe-menu-update
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/menu/{menuId}
+            - Method=PUT
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER
+                requireAuth: true
+        # 단일 메뉴 삭제 (사장)
+        - id: seongsubean-cafe-menu-delete
+          uri: lb://SEONGSUBEAN-CAFEMENU-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/menu/{menuId}
+            - Method=DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER
+                requireAuth: true
+
 
 eureka:
   instance:
