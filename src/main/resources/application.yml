@@ -160,12 +160,12 @@ spring:
               args:
                 allowedRoles: ADMIN
                 requireAuth: true
-        # 카페 승인
+        # 카페 승인, 카페 등록 취소
         - id: seongsubean-cafe-register-accept
           uri: lb://SEONGSUBEAN-CAFE-BACKEND
           predicates:
-            - Path=/api/cafes/{cafeId}
-            - Method=POST
+            - Path=/api/manager/cafes/{cafeId}
+            - Method=POST,DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - name: AuthorizationHeaderFilter
@@ -178,18 +178,6 @@ spring:
           predicates:
             - Path=/api/manager/cafes
             - Method=POST
-          filters:
-            - RemoveRequestHeader=Cookie
-            - name: AuthorizationHeaderFilter
-              args:
-                allowedRoles: ADMIN
-                requireAuth: true
-        # 카페 등록 삭제
-        - id: seongsubean-cafe-register-delete
-          uri: lb://SEONGSUBEAN-CAFE-BACKEND
-          predicates:
-            - Path=/api/manager/{cafeId}
-            - Method=DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - name: AuthorizationHeaderFilter
