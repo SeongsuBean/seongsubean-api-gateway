@@ -43,7 +43,7 @@ spring:
         - id: seongsubean-account-manage
           uri: lb://ACCOUNTSERVICE
           predicates:
-            - Path=/api/account/profile,/api/account/profile/image/{file},/api/account
+            - Path=/api/account/profile,/api/account/profile/image,/api/account
             - Method=GET,POST,PUT,DELETE
           filters:
             - RemoveRequestHeader=Cookie
