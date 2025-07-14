@@ -6,8 +6,8 @@ spring:
   cloud:
     gateway.server.webflux:
       routes:
-        # ?? ??
-        # ???
+        # 계정 라우팅
+        # 계정 생성 (모두)
         - id: seongsubean-account-login
           uri: lb://ACCOUNTSERVICE
           predicates:
@@ -15,7 +15,7 @@ spring:
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
-        # ???
+        # 로그인 (모두)
         - id: seongsubean-account-login
           uri: lb://ACCOUNTSERVICE
           predicates:
@@ -23,7 +23,7 @@ spring:
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
-        # ??? ?? ??
+        # 이메일 중복 확인 (모두)
         - id: seongsubean-account-join
           uri: lb://ACCOUNTSERVICE
           predicates:
@@ -31,7 +31,7 @@ spring:
             - Method=GET
           filters:
             - RemoveRequestHeader=Cookie
-        # ??? ????
+        # 닉네임 중복 확인 (모두)
         - id: seongsubean-account-nickname
           uri: lb://ACCOUNTSERVICE
           predicates:
@@ -39,7 +39,7 @@ spring:
             - Method=GET
           filters:
             - RemoveRequestHeader=Cookie
-        # ?? ??
+        # 계정 프로필 관리 (고객, 사장, 관리자 권한)
         - id: seongsubean-account-delete
           uri: lb://ACCOUNTSERVICE
           predicates:
@@ -51,11 +51,11 @@ spring:
               args:
                 allowedRoles: CUSTOMER,OWNER,ADMIN
                 requireAuth: true
-        # ?? ??
+        #관리자 계정 관리 (관리자 권한)
         - id: seongsubean-account-manager
           uri: lb://ACCOUNTSERVICE
           predicates:
-            - Path=/api/manager/**
+            - Path=/api/manager/users
             - Method=GET,DELETE
           filters:
             - RemoveRequestHeader=Cookie
@@ -63,14 +63,127 @@ spring:
               args:
                 allowedRoles: ADMIN
                 requireAuth: true
-        # ?? ??
-        - id: seongsubean-cafe-backend # ??? ??
-          uri: lb://SEONGSUBEAN-CAFE-BACKEND #lb: ?? ???
-          predicates: # ???? ??? ??
-            - Path=/api/cafes/** # ??
-            - Method=GET # ??
+        # 카페 라우팅
+        # 카페 생성 (고객, 사장 권한)
+        - id: seongsubean-cafe-create
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes
+            - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER,OWNER
+                requireAuth: true
+        # 카페 검색 (모두)
+        - id: seongsubean-cafe-search
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/search
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 카페 상세 조회 (모두)
+        - id: seongsubean-cafe-detail
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 랜덤 카페 조회 (모두)
+        - id: seongsubean-cafe-random
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/random
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 내 카페 조회 (사장, 관리자 권한)
+        - id: seongsubean-cafe-mycafes
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/mycafes
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER,ADMIN
+                requireAuth: true
+        # 카페 수정 (사장, 관리자 권한)
+        - id: seongsubean-cafe-update
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}
+            - Method=PUT
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER,ADMIN
+                requireAuth: true
+        # 카페 삭제 (사장, 관리자 권한)
+        - id: seongsubean-cafe-delete
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}
+            - Method=DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER,ADMIN
+                requireAuth: true
+        # 카페 영업일 수정 (사장, 관리자 권한)
+        - id: seongsubean-cafe-businessday-update
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/business-day
+            - Method=PATCH
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: OWNER,ADMIN
+                requireAuth: true
+        # 카페 등록 리스트 전체 조회
+        - id: seongsubean-cafe-register-select
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/manager/cafes
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: ADMIN
+                requireAuth: true
+        # 카페 승인, 카페 등록 취소
+        - id: seongsubean-cafe-register-accept
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/manager/cafes/{cafeId}
+            - Method=POST,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: ADMIN
+                requireAuth: true
+        # 카페 추가
+        - id: seongsubean-cafe-register-post
+          uri: lb://SEONGSUBEAN-CAFE-BACKEND
+          predicates:
+            - Path=/api/manager/cafes
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: ADMIN
+                requireAuth: true
 
 eureka:
   instance:
