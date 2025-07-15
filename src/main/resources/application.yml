@@ -6,6 +6,87 @@ spring:
   cloud:
     gateway.server.webflux:
       routes:
+        # 리뷰 라우팅
+        # 리뷰 추가 (고객)
+        - id: seongsubean-cafe-review-create
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/reviews
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER
+                requireAuth: true
+        # 내가쓴 리뷰 조회(고객)
+        - id: seongsubean-cafe-review-all-select
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/reviews/{reviewId}
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER
+                requireAuth: true
+        # 카페의 전체 리뷰 조회(모두)
+        - id: seongsubean-cafe-review-user-select
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/{cafeId}/reviews
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 닉네임으로 내가 쓴 리뷰 조회(고객)
+        - id: seongsubean-cafe-review-nickname-select
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/users/{nickName}
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER
+                requireAuth: true
+        # 리뷰 페이지 네이션(모두)
+        - id: seongsubean-cafe-review-pagenation
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/reviews
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 리뷰 삭제(고객, 관리자)
+        - id: seongsubean-cafe-reivew-delete
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/users/{userId}/reviews/{reviewId}
+            - Method=DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - name: AuthorizationHeaderFilter
+              args:
+                allowedRoles: CUSTOMER, ADMIN
+                requireAuth: true
+        # 랭킹 조회(모두)
+        - id: seongsubean-cafe-review-ranking-select
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/ranking
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+        # 리뷰 통계 조회(모두)
+        - id: seongsubean-cafe-review-statistics-select
+          uri: lb://SEONGSUBEAN-CAFEREVIEW-BACKEND
+          predicates:
+            - Path=/api/cafes/summary/{cafeId}
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
         # 계정 라우팅
         # 계정 생성 (모두)
         - id: seongsubean-account-create
